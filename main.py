@@ -38,6 +38,8 @@ def test_db():
     user = 'john'
     password = '123456'
     database = 'python_test'
+
+    #  http://zetcode.com/python/pymysql/
     try:
         con = pymysql.connect(host, user, password, database)
     except err:
