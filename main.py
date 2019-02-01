@@ -34,16 +34,20 @@ class MainHandler(tornado.web.RequestHandler):
 
 
 def test_db():
-    host = '127.0.0.1'
-    user = 'john'
-    password = '123456'
-    database = 'python_test'
+    host = os.getenv('DB_HOST', '127.0.0.1')
+    user = os.getenv('DB_USER', 'john')
+    password = os.getenv('DB_PASS', '123456')
+    database = os.getenv('DB_NAME', 'python_test')
 
     #  http://zetcode.com/python/pymysql/
     try:
         con = pymysql.connect(host, user, password, database)
-    except err:
-        print(err)
+    except pymysql.err.OperationalError as err:
+        #  https://github.com/PyMySQL/PyMySQL/blob/master/pymysql/err.py
+        print('got error', err)
+        raise err
+    except Exception as e:
+        print('handle unknown exception', e)
 
     with con:
         cur = con.cursor()
