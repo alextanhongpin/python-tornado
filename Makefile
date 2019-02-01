@@ -11,3 +11,9 @@ freeze:
 
 start:
 	python3 main.py
+
+up:
+	docker-compose up -d
+
+down:
+	docker-compose down

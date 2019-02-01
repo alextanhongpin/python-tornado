@@ -1,2 +1,2 @@
-mysql-connector==2.1.6
+PyMySQL==0.9.3
 tornado==5.1.1

@@ -11,8 +11,8 @@ import tornado.web
 from tornado.log import enable_pretty_logging
 enable_pretty_logging()
 
-import mysql.connector
-from mysql.connector import errorcode
+#  import mysql.connector
+import pymysql
 
 import service.echo as echo
 
@@ -32,38 +32,25 @@ class MainHandler(tornado.web.RequestHandler):
         res = self.service.echo(req['msg'])
         self.write(', '.join(res))
 
-def make_app():
-    return tornado.web.Application([
-            (r'/', MainHandler, dict(service=echo.make_service()))
-        ])
 
 def test_db():
+    host = '127.0.0.1'
+    user = 'john'
+    password = '123456'
+    database = 'python_test'
     try:
-        config = {
-            'user': 'john',
-            'password': '123456',
-            'host': '127.0.0.1',
-            'database': 'python_test'
-        }
-        cnx = mysql.connector.connect(**config)
-    except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_ADDRESS_DENIED_ERROR:
-            print('invalid database username or credentials')
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print('database does not exist')
-        else:
-            print(err)
-
-    cursor = cnx.cursor()
-    try:
-        cursor.execute('select 1 + 1')
-        for (data) in cursor:
-            print('cursor data', data)
-        cursor.close()
-    except mysql.connector.Error as err:
+        con = pymysql.connect(host, user, password, database)
+    except err:
         print(err)
 
-    cnx.close()
+    with con:
+        cur = con.cursor()
+        cur.execute('select 1 + 1')
+        result = cur.fetchone()
+        print(f'result is {result}')
+    #  except mysql.connector.Error as err:
+       #  print(err)
+
     print('mysql closed')
 
 def sig_handler(server, sig, frame):
@@ -80,16 +67,19 @@ def sig_handler(server, sig, frame):
     io_loop.add_callback_from_signal(shutdown)
 
 if __name__ == '__main__':
-    app = make_app()
+    app = tornado.web.Application([
+        (r'/', MainHandler, dict(service=echo.make_service()))
+    ])
     server = tornado.httpserver.HTTPServer(app)
     server.listen(port)
     print(f'listening to port*:{port}. press ctrl + c to cancel')
+
+    # Add graceful shutdown.
     signal.signal(signal.SIGTERM, partial(sig_handler, server))
     signal.signal(signal.SIGINT, partial(sig_handler, server))
 
     test_db()
 
-    # TODO: Add graceful shutdown tornado.
     # TODO: Enable only in development mode.
     tornado.autoreload.start()
     for dir, _, files in os.walk('service'):
