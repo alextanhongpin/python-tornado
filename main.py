@@ -11,11 +11,13 @@ port = 8888
 class MainHandler(tornado.web.RequestHandler):
     service = echo.make_service()
     def get(self):
-        self.write(self.service.echo(''))
-                                                                                                                                                                                                    # $ curl -XPOST -H 'Content-Type: application/json' -d '{"msg": "something else"}' http://localhost:8888/
+        res = self.service.echo('')
+        self.write(', '.join(res))
+                                                                                                                                                                          # $ curl -XPOST -H 'Content-Type: application/json' -d '{"msg": "something else"}' http://localhost:8888/
     def post(self):
-        json_body = tornado.escape.json_decode(self.request.body)
-        self.write(self.service.echo(json_body['msg']))
+        req = tornado.escape.json_decode(self.request.body)
+        res = self.service.echo(req['msg'])
+        self.write(', '.join(res))
 
 def make_app():
     return tornado.web.Application([

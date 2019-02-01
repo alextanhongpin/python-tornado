@@ -1,9 +1,12 @@
 from service.echo.interface import Repository
 
 class RepositoryImpl(Repository):
-    _msg = ''
-    def get_msg(self):
-        return self._msg
+    __msgs = []
+    def get_all(self):
+        return self.__msgs
 
-    def set_msg(self, msg: str):
-        self._msg = msg
+    def create(self, msg: str):
+        self.__msgs.append(msg)
+
+    def has(self, msg: str) -> bool:
+        return msg in self.__msgs
