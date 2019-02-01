@@ -8,3 +8,6 @@ install:
 
 freeze:
 	pip3 freeze > requirements.txt
+
+start:
+	python3 main.py
